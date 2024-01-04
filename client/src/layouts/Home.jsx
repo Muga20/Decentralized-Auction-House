@@ -3,7 +3,7 @@ import Auctions from "./Auctions";
 import Gradient from "../styles/img/gradient.jpg";
 import GradientDark from "../styles/img/gradient_dark.jpg";
 import hero from "../styles/img/hero/hero.jpg";
-
+import { Link } from "react-router-dom";
 
 function Home() {
   return (
@@ -20,25 +20,25 @@ function Home() {
           <div class="grid h-full items-center">
             <div class="col-span-6 flex h-full flex-col items-center justify-center py-10 md:items-start md:py-20 xl:col-span-4">
               <h1 class="mb-6 text-center font-display text-5xl text-jacarta-700 dark:text-white md:text-left lg:text-6xl xl:text-7xl">
-                Buy, sell and collect NFTs.
+                Buy, sell and auction your items.
               </h1>
               <p class="mb-8 text-center text-lg dark:text-jacarta-200 md:text-left">
-                The world's largest digital marketplace for crypto collectibles
-                and non-fungible tokens
+                The world's largest digital marketplace for auctions and
+                collectibles.
               </p>
               <div class="flex space-x-4">
-                <a
-                  href="create.html"
+                <Link
+                  to="/create"
                   class="w-36 rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark"
                 >
                   Upload
-                </a>
-                <a
-                  href="collections.html"
+                </Link>
+                <Link
+                  to="/auctions"
                   class="w-36 rounded-full bg-white py-3 px-8 text-center font-semibold text-accent shadow-white-volume transition-all hover:bg-accent-dark hover:text-white hover:shadow-accent-volume"
                 >
                   Explore
-                </a>
+                </Link>
               </div>
             </div>
 
