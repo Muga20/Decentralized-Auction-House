@@ -32,12 +32,24 @@ module.exports = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.17",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
-      },
+    version: '0.8.19',
+    defaultNetwork: 'sepolia',
+    networks: {
+        sepolia: {
+          url: 'https://rpc.ankr.com/eth_sepolia',
+          accounts: [`0x${process.env.PRIVATE_KEY}`],
+        },
+        hardhat: {
+            // Configuration for the 'hardhat' network
+            // Add settings if applicable
+        },
+        goerli: {
+            url: 'https://rpc.ankr.com/eth_goerli', 
+            accounts: [`0x${process.env.PRIVATE_KEY}`],
+            // Configuration for the 'goerli' network
+            // Add settings if applicable
+        },
     },
-  },
-};
+}
+
+}
