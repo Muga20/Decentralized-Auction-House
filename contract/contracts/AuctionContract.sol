@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19; // Remember to change the hardhat config too to the one you currently using 
+pragma solidity 0.8.19; // Remember to change the hardhat.config too to version the one you currently using 
 
 contract AuctionContract {
     struct Item {

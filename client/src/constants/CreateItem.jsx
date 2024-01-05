@@ -1,151 +1,234 @@
-import React from 'react'
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ethers } from "ethers";
+import { useStateContext } from "../context";
+import { useWallet, ConnectWallet } from "@thirdweb-dev/react";
+import Image from "../styles/img/gradient_light.jpg";
+import { checkIfImage } from "../utils";
 
 function CreateItem() {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const { createAuction } = useStateContext();
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    startingPrice: "",
+    auctionEndTimeInSeconds: "",
+    image: "",
+  });
+
+  const wallet = useWallet();
+  const isWalletConnected = wallet && wallet.account !== null;
+
+  const handleFormFieldChange = (fieldName, e) => {
+    const { value } = e.target;
+
+    // Get the timestamp in milliseconds
+    const timestamp = Date.parse(value);
+    const formattedDate = value; // Retain the displayed date
+
+    // Update the form state separately with timestamp and displayed date
+    setForm({
+      ...form,
+      [fieldName]: formattedDate,
+      auctionEndTimeInMillis: timestamp,
+    });
+
+    if (!isNaN(timestamp)) {
+      console.log("Timestamp in milliseconds:", timestamp);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    checkIfImage(form.image, async (exists) => {
+      if (exists) {
+        setIsLoading(true);
+        try {
+          await createAuction({
+            ...form,
+            target: ethers.utils.parseUnits(form.startingPrice, 18),
+          });
+          setIsLoading(false);
+          // navigate("/");
+        } catch (error) {
+          console.error("Error creating auction:", error);
+          setIsLoading(false);
+        }
+      } else {
+        alert("Provide a valid image URL");
+        setForm({ ...form, image: "" });
+      }
+    });
+  };
+
   return (
     <div>
-    <section class="relative py-24">
-    <picture class="pointer-events-none absolute inset-0 -z-10 dark:hidden">
-      <img src="img/gradient_light.jpg" alt="gradient" class="h-full w-full" />
-    </picture>
-    <div class="container">
-      <h1 class="py-16 text-center font-display text-4xl font-medium text-jacarta-700 dark:text-white">Create</h1>
+      <section class="relative py-24">
+        <picture class="pointer-events-none absolute inset-0 -z-10 dark:hidden">
+          <img src={Image} alt="gradient" class="h-full w-full" />
+        </picture>
+        <div class="container">
+          <h1 class="py-16 text-center font-display text-4xl font-medium text-jacarta-700 dark:text-white">
+            Create
+          </h1>
 
-      <div class="mx-auto max-w-[48.125rem]">
-       
-        <div class="mb-6">
-          <label class="mb-2 block font-display text-jacarta-700 dark:text-white"
-            >Image, Video, Audio, or 3D Model<span class="text-red">*</span></label
-          >
-          <p class="mb-3 text-2xs dark:text-jacarta-300">Drag or choose your file to upload</p>
-
-          <div
-            class="group relative flex max-w-md flex-col items-center justify-center rounded-lg border-2 border-dashed border-jacarta-100 bg-white py-20 px-5 text-center dark:border-jacarta-600 dark:bg-jacarta-700"
-          >
-            <div class="relative z-10 cursor-pointer">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                class="mb-4 inline-block fill-jacarta-500 dark:fill-white"
-              >
-                <path fill="none" d="M0 0h24v24H0z" />
-                <path
-                  d="M16 13l6.964 4.062-2.973.85 2.125 3.681-1.732 1-2.125-3.68-2.223 2.15L16 13zm-2-7h2v2h5a1 1 0 0 1 1 1v4h-2v-3H10v10h4v2H9a1 1 0 0 1-1-1v-5H6v-2h2V9a1 1 0 0 1 1-1h5V6zM4 14v2H2v-2h2zm0-4v2H2v-2h2zm0-4v2H2V6h2zm0-4v2H2V2h2zm4 0v2H6V2h2zm4 0v2h-2V2h2zm4 0v2h-2V2h2z"
-                />
-              </svg>
-              <p class="mx-auto max-w-xs text-xs dark:text-jacarta-300">
-                JPG, PNG, GIF, SVG, MP4, WEBM, MP3, WAV, OGG, GLB, GLTF. Max size: 100 MB
-              </p>
-            </div>
-            <div
-              class="absolute inset-4 cursor-pointer rounded bg-jacarta-50 opacity-0 group-hover:opacity-100 dark:bg-jacarta-600"
-            ></div>
-            <input
-              type="file"
-              accept="image/*,video/*,audio/*,webgl/*,.glb,.gltf"
-              id="file-upload"
-              class="absolute inset-0 z-20 cursor-pointer opacity-0"
-            />
-          </div>
-        </div>
-
-        
-        <div class="mb-6">
-          <label for="item-name" class="mb-2 block font-display text-jacarta-700 dark:text-white"
-            >Name<span class="text-red">*</span></label
-          >
-          <input
-            type="text"
-            id="item-name"
-            class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
-            placeholder="Item name"
-            required
-          />
-        </div>
-
-       
-        <div class="mb-6">
-          <label for="item-external-link" class="mb-2 block font-display text-jacarta-700 dark:text-white"
-            >External link</label
-          >
-          <p class="mb-3 text-2xs dark:text-jacarta-300">
-            We will include a link to this URL on this item's detail page, so that users can click to learn more
-            about it. You are welcome to link to your own webpage with more details.
-          </p>
-          <input
-            type="url"
-            id="item-external-link"
-            class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
-            placeholder="https://yoursite.io/item/123"
-          />
-        </div>
-
-  
-        <div class="mb-6">
-          <label for="item-supply" class="mb-2 block font-display text-jacarta-700 dark:text-white">Supply</label>
-
-          <div class="mb-3 flex items-center space-x-2">
-            <p class="text-2xs dark:text-jacarta-300">
-              The number of items that can be minted. No gas cost to you!
-              <span
-                class="inline-block"
-                data-tippy-content="Setting your asset as explicit and sensitive content, like pornography and other not safe for work (NSFW) content, will protect users with safe search while browsing Xhibiter."
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                  class="ml-1 -mb-[3px] h-4 w-4 fill-jacarta-500 dark:fill-jacarta-300"
+          <form onSubmit={handleSubmit}>
+            <div class="mx-auto max-w-[48.125rem]">
+              <div class="mb-6">
+                <label
+                  for="item-name"
+                  class="mb-2 block font-display text-jacarta-700 dark:text-white"
                 >
-                  <path fill="none" d="M0 0h24v24H0z"></path>
-                  <path
-                    d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"
-                  ></path>
-                </svg>
-              </span>
-            </p>
-          </div>
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="item-name"
+                  class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
+                  placeholder="Item name"
+                  required
+                  value={form.title}
+                  onChange={(e) => handleFormFieldChange("title", e)}
+                />
+              </div>
 
-          <input
-            type="text"
-            id="item-supply"
-            class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
-            placeholder="1"
-          />
+              <div class="mb-6">
+                <label
+                  for="item-image-url"
+                  class="mb-2 block font-display text-jacarta-700 dark:text-white"
+                >
+                  Image URL
+                </label>
+                <p class="mb-3 text-2xs dark:text-jacarta-300">
+                  Please provide a direct URL to the image of this item.
+                </p>
+                <input
+                  type="url"
+                  id="item-image-url"
+                  class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
+                  placeholder="https://yoursite.io/images/itemimage.jpg"
+                  value={form.image}
+                  onChange={(e) => handleFormFieldChange("image", e)}
+                />
+              </div>
+              <div class="mb-6">
+                <label
+                  for="item-price"
+                  class="mb-2 block font-display text-jacarta-700 dark:text-white"
+                >
+                  Price in Ether (ETH)
+                </label>
+                <div class="mb-3 flex items-center space-x-2">
+                  <p class="text-2xs dark:text-jacarta-300">
+                    Enter the price for the item in Ether.
+                    <span
+                      class="inline-block"
+                      data-tippy-content="This is the cost users will pay in Ether for the item."
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        class="ml-1 -mb-[3px] h-4 w-4 fill-jacarta-500 dark:fill-jacarta-300"
+                      >
+                        <path fill="none" d="M0 0h24v24H0z"></path>
+                        <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"></path>
+                      </svg>
+                    </span>
+                  </p>
+                </div>
+                <input
+                  type="number"
+                  step="any"
+                  id="item-price"
+                  class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
+                  placeholder="0.1"
+                  value={form.startingPrice}
+                  onChange={(e) => handleFormFieldChange("startingPrice", e)}
+                />
+              </div>
+
+              <div class="mb-6">
+                <label
+                  for="item-auction-end-date"
+                  class="mb-2 block font-display text-jacarta-700 dark:text-white"
+                >
+                  Auction End Date
+                </label>
+                <div class="mb-3 flex items-center space-x-2">
+                  <p class="text-2xs dark:text-jacarta-300">
+                    Please select the end date for the auction.
+                    <span
+                      class="inline-block"
+                      data-tippy-content="This is when the auction will conclude."
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        class="ml-1 -mb-[3px] h-4 w-4 fill-jacarta-500 dark:fill-jacarta-300"
+                      >
+                        <path fill="none" d="M0 0h24v24H0z"></path>
+                        <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"></path>
+                      </svg>
+                    </span>
+                  </p>
+                </div>
+                <input
+                  type="date"
+                  id="item-auction-end-date"
+                  className="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
+                  placeholder="YYYY-MM-DD"
+                  value={form.auctionEndTimeInSeconds}
+                  onChange={(e) =>
+                    handleFormFieldChange("auctionEndTimeInSeconds", e)
+                  }
+                />
+              </div>
+
+              <div class="mb-6">
+                <label
+                  for="item-description"
+                  class="mb-2 block font-display text-jacarta-700 dark:text-white"
+                >
+                  Description
+                </label>
+                <p class="mb-3 text-2xs dark:text-jacarta-300">
+                  The description will be included on the item's detail page
+                  underneath its image. Markdown syntax is supported.
+                </p>
+                <textarea
+                  id="item-description"
+                  class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
+                  rows="4"
+                  required
+                  placeholder="Provide a detailed description of your item."
+                  value={form.description}
+                  onChange={(e) => handleFormFieldChange("description", e)}
+                ></textarea>
+              </div>
+
+              {isWalletConnected ? (
+                <button
+                  type="submit"
+                  className="rounded-full py-3 px-8 text-center font-semibold text-white transition-all bg-accent-lighter"
+                >
+                  Create
+                </button>
+              ) : (
+                <span>Connect Your wallet </span>
+              )}
+            </div>
+          </form>
         </div>
-
-
-       
-        <div class="mb-6">
-          <label for="item-description" class="mb-2 block font-display text-jacarta-700 dark:text-white"
-            >Description</label
-          >
-          <p class="mb-3 text-2xs dark:text-jacarta-300">
-            The description will be included on the item's detail page underneath its image. Markdown syntax is
-            supported.
-          </p>
-          <textarea
-            id="item-description"
-            class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
-            rows="4"
-            required
-            placeholder="Provide a detailed description of your item."
-          ></textarea>
-        </div>
-
-        <button
-          disabled
-          class="cursor-default rounded-full bg-accent-lighter py-3 px-8 text-center font-semibold text-white transition-all"
-        >
-          Create
-        </button>
-      </div>
+      </section>
     </div>
-  </section>
-    </div>
-  )
+  );
 }
 
-export default CreateItem
+export default CreateItem;
