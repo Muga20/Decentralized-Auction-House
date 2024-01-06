@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
 import { useStateContext } from "../context";
-import { useWallet, ConnectWallet } from "@thirdweb-dev/react";
+import { useWallet} from "@thirdweb-dev/react";
 import Image from "../styles/img/gradient_light.jpg";
 import { checkIfImage } from "../utils";
 
