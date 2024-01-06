@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import { useStateContext } from "../context";
 import { useWallet, ConnectWallet } from "@thirdweb-dev/react";
@@ -7,7 +6,6 @@ import Image from "../styles/img/gradient_light.jpg";
 import { checkIfImage } from "../utils";
 
 function CreateItem() {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { createAuction } = useStateContext();
   const [form, setForm] = useState({
@@ -23,12 +21,9 @@ function CreateItem() {
 
   const handleFormFieldChange = (fieldName, e) => {
     const { value } = e.target;
-
-    // Get the timestamp in milliseconds
     const timestamp = Date.parse(value);
-    const formattedDate = value; // Retain the displayed date
+    const formattedDate = value; 
 
-    // Update the form state separately with timestamp and displayed date
     setForm({
       ...form,
       [fieldName]: formattedDate,
@@ -52,7 +47,6 @@ function CreateItem() {
             target: ethers.utils.parseUnits(form.startingPrice, 18),
           });
           setIsLoading(false);
-          // navigate("/");
         } catch (error) {
           console.error("Error creating auction:", error);
           setIsLoading(false);
