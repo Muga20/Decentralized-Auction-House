@@ -27,24 +27,25 @@ export const StateContextProvider = ({ children }) => {
   const startAuction = async (formData) => {
     try {
       const auctionEndTimeInSeconds = Math.floor(
-        new Date(formData.auctionEndTime).getTime() / 1000
+        new Date(formData._auctionEndTime).getTime() / 1000
       );
-
-      const data = await createAuction(
+  
+      const { data } = await createAuction(
         address, 
-        formData.title,
-        formData.description,
-        formData.startingPrice,
+        formData._title,
+        formData._description,
+        ethers.utils.parseEther(formData._startingPrice),
         auctionEndTimeInSeconds,
-        formData.image
+        formData._image
       );
-
+  
       console.log("Auction creation success", data);
     } catch (error) {
       console.log("Auction creation failed", error);
     }
   };
-
+  
+  
   
   return (
     <StateContext.Provider
