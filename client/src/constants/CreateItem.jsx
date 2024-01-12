@@ -1,62 +1,37 @@
 import React, { useState } from "react";
-import { ethers } from "ethers";
-import { useStateContext } from "../context";
-import { useWallet} from "@thirdweb-dev/react";
 import Image from "../styles/img/gradient_light.jpg";
-import { checkIfImage } from "../utils";
+
 
 function CreateItem() {
   const [isLoading, setIsLoading] = useState(false);
-  const { createAuction } = useStateContext();
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    startingPrice: "",
-    auctionEndTimeInSeconds: "",
-    image: "",
-  });
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [startingPrice , setStartingPrice]= useState('');
+  const [auctionEndTime ,setAuctionEndTime] = useState('');
+  const [image, setImage] = useState('');
 
-  const wallet = useWallet();
-  const isWalletConnected = wallet && wallet.account !== null;
+  
+  const startAuction = async () => {
+    try {
+      const auctionEndTimeInSeconds = Math.floor(
+        new Date(formData._auctionEndTime).getTime() / 1000
+      );
 
-  const handleFormFieldChange = (fieldName, e) => {
-    const { value } = e.target;
-    const timestamp = Date.parse(value);
-    const formattedDate = value; 
-
-    setForm({
-      ...form,
-      [fieldName]: formattedDate,
-      auctionEndTimeInMillis: timestamp,
-    });
-
-    if (!isNaN(timestamp)) {
-      console.log("Timestamp in milliseconds:", timestamp);
+      const data = await createAuction(
+        address, 
+        formData._title,
+        formData._description,
+        ethers.utils.parseEther(formData._startingPrice),
+        auctionEndTimeInSeconds,
+        formData._image
+      );
+  
+      console.log("Auction creation success", data);
+    } catch (error) {
+      console.log("Auction creation failed", error);
     }
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    checkIfImage(form.image, async (exists) => {
-      if (exists) {
-        setIsLoading(true);
-        try {
-          await createAuction({
-            ...form,
-            target: ethers.utils.parseUnits(form.startingPrice, 18),
-          });
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error creating auction:", error);
-          setIsLoading(false);
-        }
-      } else {
-        alert("Provide a valid image URL");
-        setForm({ ...form, image: "" });
-      }
-    });
-  };
+  
 
   return (
     <div>

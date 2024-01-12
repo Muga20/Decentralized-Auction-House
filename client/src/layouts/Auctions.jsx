@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useContract, useContractRead } from "@thirdweb-dev/react";
+import { CONTRACT_ADDRESS } from "../config/Contract";
 
 function Auctions() {
-  const { contract } = useContract("0x17CC598810C1218414dc498C1BCec59c21409aD5");
+  
+  const { contract } = useContract(CONTRACT_ADDRESS);
   const { data: AuctionContract } = useContractRead(contract, "getItems");
 
   return (
@@ -54,7 +56,10 @@ function Auctions() {
                       >
                         Place Bid
                       </button>
-                      <Link to={`/item/${item.id}`} className="group flex items-center">
+                      <Link
+                        to={`/item/${item.id}`}
+                        className="group flex items-center"
+                      >
                         <span className="font-display text-sm font-semibold group-hover:text-accent dark:text-jacarta-200">
                           View
                         </span>
