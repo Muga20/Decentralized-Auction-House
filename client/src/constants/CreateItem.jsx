@@ -1,37 +1,77 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import {
+  useContract,
+  useContractWrite,
+  useAddress,
+  ConnectWallet,
+} from "@thirdweb-dev/react";
+import { ethers } from "ethers";
+import { CONTRACT_ADDRESS } from "../config/Contract";
 import Image from "../styles/img/gradient_light.jpg";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-
-function CreateItem() {
+const CreateItem = () => {
+  // State variables
   const [isLoading, setIsLoading] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startingPrice , setStartingPrice]= useState('');
-  const [auctionEndTime ,setAuctionEndTime] = useState('');
-  const [image, setImage] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startingPrice, setStartingPrice] = useState("");
+  const [auctionEndTime, setAuctionEndTime] = useState("");
+  const [image, setImage] = useState("");
 
-  
-  const startAuction = async () => {
-    try {
-      const auctionEndTimeInSeconds = Math.floor(
-        new Date(formData._auctionEndTime).getTime() / 1000
-      );
+  // Ethereum-related hooks
+  const { contract } = useContract(CONTRACT_ADDRESS);
+  const address = useAddress();
+  const { mutateAsync: createAuction } = useContractWrite(
+    contract,
+    "createAuction"
+  );
 
-      const data = await createAuction(
-        address, 
-        formData._title,
-        formData._description,
-        ethers.utils.parseEther(formData._startingPrice),
-        auctionEndTimeInSeconds,
-        formData._image
-      );
-  
-      console.log("Auction creation success", data);
-    } catch (error) {
-      console.log("Auction creation failed", error);
-    }
+  const auctionEndTimeInSeconds = Math.floor(
+    new Date(auctionEndTime).getTime() / 1000
+  );
+
+  // Prepare data object
+  const dataTo = {
+    _owner: address,
+    _title: title,
+    _description: description,
+    _startingPrice: ethers.utils.parseEther(startingPrice || "0"),
+    _auctionEndTime: auctionEndTimeInSeconds,
+    _image: image,
   };
-  
+
+  // Function to handle the auction creation
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      await createAuction({ args: Object.values(dataTo) });
+      toast.success("Item added successfully");
+    } catch (error) {
+      if (error) {
+        toast.error("Contract call failure");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+    
+  };
+
+  //clearing the form optional
+
+  const clearFormFields = () => {
+    setTitle("");
+    setDescription("");
+    setStartingPrice("");
+    setAuctionEndTime("");
+    setImage("");
+  };
+
+  const isFormNotEmpty =
+    title || description || startingPrice || auctionEndTime || image;
 
   return (
     <div>
@@ -59,8 +99,8 @@ function CreateItem() {
                   class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
                   placeholder="Item name"
                   required
-                  value={form.title}
-                  onChange={(e) => handleFormFieldChange("title", e)}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
 
@@ -79,8 +119,8 @@ function CreateItem() {
                   id="item-image-url"
                   class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
                   placeholder="https://yoursite.io/images/itemimage.jpg"
-                  value={form.image}
-                  onChange={(e) => handleFormFieldChange("image", e)}
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
                 />
               </div>
               <div class="mb-6">
@@ -116,8 +156,8 @@ function CreateItem() {
                   id="item-price"
                   class="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
                   placeholder="0.1"
-                  value={form.startingPrice}
-                  onChange={(e) => handleFormFieldChange("startingPrice", e)}
+                  value={startingPrice}
+                  onChange={(e) => setStartingPrice(e.target.value)}
                 />
               </div>
 
@@ -153,10 +193,8 @@ function CreateItem() {
                   id="item-auction-end-date"
                   className="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
                   placeholder="YYYY-MM-DD"
-                  value={form.auctionEndTimeInSeconds}
-                  onChange={(e) =>
-                    handleFormFieldChange("auctionEndTimeInSeconds", e)
-                  }
+                  value={auctionEndTime}
+                  onChange={(e) => setAuctionEndTime(e.target.value)}
                 />
               </div>
 
@@ -177,27 +215,51 @@ function CreateItem() {
                   rows="4"
                   required
                   placeholder="Provide a detailed description of your item."
-                  value={form.description}
-                  onChange={(e) => handleFormFieldChange("description", e)}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </div>
 
-              {isWalletConnected ? (
-                <button
-                  type="submit"
-                  className="rounded-full py-3 px-8 text-center font-semibold text-white transition-all bg-accent-lighter"
-                >
-                  Create
-                </button>
+              {ConnectWallet ? (
+                <div className="grid gap-4">
+                  <button
+                    type="submit"
+                    className="rounded-full py-3 px-8 text-center font-semibold text-white transition-all bg-accent-lighter"
+                  >
+                    Create
+                  </button>
+
+                  {isFormNotEmpty && (
+                    <button
+                      type="button"
+                      onClick={clearFormFields}
+                      className="rounded-full py-3 px-8 text-center font-semibold text-white transition-all bg-accent-lighter"
+                    >
+                      Clear Form
+                    </button>
+                  )}
+                </div>
               ) : (
                 <span>Connect Your wallet </span>
               )}
             </div>
           </form>
         </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </section>
     </div>
   );
-}
+};
 
 export default CreateItem;
