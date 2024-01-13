@@ -26,7 +26,7 @@ function Auctions() {
                         <img
                           src={item.image}
                           alt={`Item ${item.id}`}
-                          className="w-full rounded-[0.625rem]"
+                          className="w-full  rounded-[0.625rem]"
                           loading="lazy"
                         />
                       </Link>
