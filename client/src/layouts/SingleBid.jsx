@@ -4,11 +4,16 @@ import Image1 from '../styles/img/gradient_light.jpg'
 import Image2 from '../styles/img/products/item_single_large.jpg'
 import Image3 from  '../styles/img/products/item_single_full.jpg'
 import Image4 from "../styles/img/avatars/avatar_4.jpg"
-
+import { CONTRACT_ADDRESS } from "../config/Contract";
+import { useContract, useContractRead } from "@thirdweb-dev/react";
 
 function SingleBid() {
+
+  const { contract } = useContract(CONTRACT_ADDRESS);
+  const { data: AuctionContract } = useContractRead(contract, "items");
+
   return (
-    <div>
+    <div className="pt-5">
       <section class="relative pt-12 pb-24 lg:py-24">
         <picture class="pointer-events-none absolute inset-0 -z-10 dark:hidden">
           <img

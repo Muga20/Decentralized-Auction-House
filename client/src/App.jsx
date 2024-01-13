@@ -20,7 +20,7 @@ export default function Index() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/auctions" element={<Listings />} />
               <Route path="/create" element={<CreateItem />} />
-              <Route path="/item" element={<SingleBid />} />
+              <Route path="/item/:id" element={<SingleBid />} />
 
             </Routes>
           </main>
