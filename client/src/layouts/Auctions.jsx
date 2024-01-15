@@ -5,37 +5,13 @@ import { CONTRACT_ADDRESS } from "../config/Contract";
 import { Link } from "react-router-dom";
 
 function Auctions() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startingPrice, setStartingPrice] = useState("");
-  const [auctionEndTimeInSeconds, setAuctionEndTimeInSeconds] = useState("");
-  const [image, setImage] = useState("");
-  const [bidders, setBidders] = useState([]);
+  const [bidders] = useState([]);
 
   const { contract } = useContract(CONTRACT_ADDRESS);
   const { data: items } = useContractRead(contract, "getItems");
- 
 
-  useEffect(() => {
-    if (items && items.length > 0) {
-      const [
-        _owner,
-        _title,
-        _description,
-        _startingPrice,
-        _auctionEndTime,
-        _image
-      ] = items;
 
-      setTitle(_title || "");
-      setDescription(_description || "");
-      setStartingPrice(ethers.utils.formatEther(_startingPrice?.hex || "0"));
-      setAuctionEndTimeInSeconds(_auctionEndTime?.hex || "");
-      setImage(_image || "");
-    }
-  }, [items]);
 
-  
 
   return (
     <div>
@@ -67,15 +43,29 @@ function Auctions() {
                         </span>
                       </Link>
                       <div className="dropup rounded-full hover:bg-jacarta-100 dark:hover:bg-jacarta-600"></div>
+
                     </div>
                     <div className="mt-2 text-sm">
-                      <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
-                        From {startingPrice} ETH
-                      </span>
-                      <span className="text-jacarta-500 dark:text-jacarta-300">
-                        {bidders.length} Bidders
+                      <span className="mr-1 text-jakarta-700 dark:text-jakarta-200">
+                        From {item.startingPrice.toString()} ETH
                       </span>
                     </div>
+
+                    <div className="mt-2 text-sm">
+                      <span className="text-jacarta-500 dark:text-jacarta-300">
+                        Auction Ends on {new Date(item.auctionEndTime * 1000).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-2 text-sm">
+                      {item.bidders && item.bidders.length > 0 && (
+                        <span className="text-jacarta-500 dark:text-jacarta-300">
+                          Highest Bidder: {item.bidders[0].slice(0, 3)}...{item.bidders[0].slice(-2)} ({item.bidders.length} Bids)
+                        </span>
+                      )}
+                    </div>
+
+
 
                     <div className="mt-8 flex items-center justify-between">
                       <div className="flex">
@@ -104,8 +94,8 @@ function Auctions() {
               ))}
           </div>
         </div>
-      </section>
-    </div>
+      </section >
+    </div >
   );
 }
 
