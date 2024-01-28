@@ -5,7 +5,7 @@ import Home from "./layouts/Home";
 import Footer from "./components/Footer";
 import Profile from "./profile/Profile";
 import Listings from "./components/Listings";
-import CreateItem from "./constants/CreateItem";
+import CreateItem from "./layouts/CreateItem";
 import SingleBid from "./layouts/SingleBid";
 
 export default function Index() {
